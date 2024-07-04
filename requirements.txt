@@ -50,9 +50,9 @@ serial==0.0.97
 service-identity==21.1.0
 six==1.16.0
 smart-open==5.2.1
-spacy-alignments==0.8.5
-spacy-loggers==1.0.3
-spacy-transformers==1.1.8
+# spacy-alignments==0.8.5
+# spacy-loggers==1.0.3
+# spacy-transformers==1.1.8
 sqlparse==0.4.3
 srsly==2.4.8
 tomli==2.0.1
