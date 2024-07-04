@@ -67,4 +67,5 @@ typer==0.4.2
 typing_extensions==4.1.1
 wasabi==0.10.1
 websockets==10.4
+whitenoise==6.7.0
 zope.interface==5.5.2
