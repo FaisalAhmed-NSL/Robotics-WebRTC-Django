@@ -56,7 +56,7 @@ spacy-transformers==1.1.8
 sqlparse==0.4.3
 srsly==2.4.8
 tomli==2.0.1
-torch==1.12.1
+# torch==1.12.1
 tqdm==4.64.1
 Twisted==22.4.0
 txaio==22.2.1
