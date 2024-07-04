@@ -31,14 +31,19 @@ def login_user(request):
     form = AuthenticationForm()
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
+        # print('form: ',form)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
+            print('username: ',username)
+            print('password: ',password)
            
             if user is not None:
+                print('user and pass match')
                 login(request, user)
                 return HttpResponseRedirect(reverse("peer"))
+          
     
     return render(request, "login.html", context={'form': form})
 

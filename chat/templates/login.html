@@ -1,48 +1,38 @@
 {% extends 'base.html' %}
 
-{% block title_block %}Login {% endblock %}
+{% block title_block %}Login{% endblock %}
 
 {% block body_block %}
-<!-- <div class="login__form">
-    <form method="POST">
-        {{form.as_p}}
-        {% csrf_token %}
-        <p>
-            <button type="submit">Login</button>
-        </p>
-    </form>
-</div> -->
 
 <div class="form-modal">
     
     <div class="form-toggle">
-        <button id="login-toggle" onclick="toggleLogin()">log in</button>
+        <button id="login-toggle" onclick="toggleLogin()">Log In</button>
     </div>
 
     <div id="login-form">
-        <form method="post">
-            <input type="text" name="username" placeholder="Enter username"/>
-            <input type="password" name="password" placeholder="Enter password"/>
-            <button type="submit" class="btn login">login</button>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Enter username" required/>
+            <input type="password" name="password" placeholder="Enter password" required/>
+            <button type="submit" class="btn login">Login</button>
             <!-- <p><a href="javascript:void(0)">Forgotten account</a></p> -->
             <hr/>
-            {% csrf_token %}
         </form>
     </div>
 
     <div id="signup-form">
-        <form>
-            <input type="email" placeholder="Enter your email"/>
-            <input type="text" placeholder="Choose username"/>
-            <input type="password" placeholder="Create password"/>
-            <button type="button" class="btn signup">create account</button>
-            <p>Clicking <strong>create account</strong> means that you are agree to our <a href="javascript:void(0)">terms of services</a>.</p>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="email" name="email" placeholder="Enter your email" required/>
+            <input type="text" name="username" placeholder="Choose username" required/>
+            <input type="password" name="password" placeholder="Create password" required/>
+            <button type="submit" class="btn signup">Create Account</button>
+            <p>Clicking <strong>Create Account</strong> means that you agree to our <a href="javascript:void(0)">terms of services</a>.</p>
             <hr/>
-           
         </form>
     </div>
 
 </div>
-
 
 {% endblock %}

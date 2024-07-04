@@ -18,4 +18,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('chat.urls')),
+    # path('login_page/',login_page,name="login_page"),
 ]
