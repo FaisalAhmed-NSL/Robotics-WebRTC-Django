@@ -1,0 +1,193 @@
+<div id="joystick-inputs"></div>
+
+script:
+
+	// Joystick controls
+
+	var arm = "righthand_";
+	var joint = "shoulder_";
+	var stopped = true;
+
+	// Function to handle joystick connection
+	function handleJoystickConnection(event) {
+		const joystickInputs = document.getElementById('joystick-inputs');
+
+		if (event.type === 'gamepadconnected') {
+			joystickInputs.style.display = 'block';
+		} else if (event.type === 'gamepaddisconnected') {
+			joystickInputs.style.display = 'none';
+		}
+	}
+
+	// Function to handle joystick input
+	function handleJoystickInput(gamepad) {
+		// Extract joystick input values
+		const axes = gamepad.axes;
+		const buttons = gamepad.buttons;
+
+		// // Display joystick inputs dynamically
+		// const joystickInputs = document.getElementById('joystick-inputs');
+		// joystickInputs.innerHTML = '<h2>Joystick Inputs</h2>';
+
+		// // Display buttons
+		// joystickInputs.innerHTML += '<ul>';
+		// for (let i = 0; i < buttons.length; i++) {
+		//     joystickInputs.innerHTML += `<li>Button ${i}: ${buttons[i].value}</li>`;
+		// }
+		// joystickInputs.innerHTML += '</ul>';
+
+		// // Display axes
+		// joystickInputs.innerHTML += '<ul>';
+		// for (let i = 0; i < axes.length; i++) {
+		//     joystickInputs.innerHTML += `<li>Axis ${i}: ${axes[i]}</li>`;
+		// }
+		// joystickInputs.innerHTML += '</ul>';
+
+		// Robot control logic based on joystick inputs
+		// Implement your control logic here based on axes and buttons
+
+		if (axes[0] < -0.5) {
+			sendControl(`left`);
+			stopped = false;
+		}
+		else if (axes[0] > 0.5) {
+			sendControl(`right`);
+			stopped = false;
+		}
+		if (axes[1] < -0.5) {
+			sendControl(`forward`);
+			stopped = false;
+		}
+		else if (axes[1] > 0.5) {
+			sendControl(`reverse`);
+			stopped = false;
+		}
+		if (axes[1] < -0.5 && axes[0] < -0.5) {
+			sendControl(`forward_left`);
+			stopped = false;
+		}
+		if (axes[1] < -0.5 && axes[0] > 0.5) {
+			sendControl(`forward_right`);
+			stopped = false;
+		}
+		if (axes[1] > 0.5 && axes[0] < -0.5) {
+			sendControl(`reverse_left`);
+			stopped = false;
+		}
+		if (axes[1] > 0.5 && axes[0] > 0.5) {
+			sendControl(`reverse_right`);
+			stopped = false;
+		}
+		if (axes[3] < -0.5) {
+			stopped = false;
+			sendControl(`up`);
+
+		}
+		else if (axes[3] > 0.5) {
+			stopped = false;
+			sendControl(`down`);
+
+		}
+		if (axes[2] < -0.5) {
+			stopped = false;
+			sendControl(`head_left`);
+		}
+		else if (axes[2] > 0.5) {
+			stopped = false;
+			sendControl(`head_right`);
+		}
+
+		if (buttons[4].value === 1) {
+			arm = "lefthand_";
+		}
+		if (buttons[5].value === 1) {
+			arm = "righthand_";
+		}
+		if (buttons[3].value === 1) {
+			joint = "shoulder_";
+		}
+		if (buttons[1].value === 1) {
+			joint = "elbow_";
+		}
+		if (buttons[0].value === 1) {
+			joint = "wrist_";
+		}
+
+		if (buttons[10].value === 1) {
+			sendControl(`arm_reset`);
+			stopped = false;
+		}
+		if (buttons[11].value === 1) {
+			sendControl(`head_reset`);
+			stopped = false;
+		}
+		if (buttons[10].value === 1 && buttons[11].value === 1) {
+			sendControl(`arm_reset`);
+			sendControl(`camera_hard_reset`);
+			sendControl(`stop`);
+			stopped = true;
+		}
+		else if (buttons[12].value === 1) {
+			sendControl(`${arm}${joint}moveup`);
+			stopped = false;
+		}
+		else if (buttons[13].value === 1) {
+			sendControl(`${arm}${joint}movedown`);
+			stopped = false;
+		}
+		else if (buttons[14].value === 1) {
+			sendControl(`${arm}${joint}rotateleft`);
+			stopped = false;
+		}
+		else if (buttons[15].value === 1) {
+			sendControl(`${arm}${joint}rotateright`);
+			stopped = false;
+		}
+
+		if (buttons[6].value === 1.0) {
+			sendControl(`lefthand_release`);
+			stopped = false;
+
+		}
+		else if (buttons[6].value < 1.0 && buttons[6].value > 0.0) {
+			sendControl(`lefthand_grab`);
+			stopped = false;
+		}
+		if (buttons[7].value === 1.0) {
+			sendControl(`righthand_release`);
+			stopped = false;
+
+		}
+		else if (buttons[7].value < 1.0 && buttons[7].value > 0.0) {
+			sendControl(`righthand_grab`);
+			stopped = false;
+		}
+		else if (axes[0] === 0.0 && axes[1] === 0.0 && axes[2] === 0.0 && axes[3] === 0.0 && stopped === false) {
+
+			sendControl(`stop`);
+			stopped = true;
+
+		}
+
+
+	}
+
+	// Function to continuously poll and handle joystick input
+	function pollGamepad() {
+		const gamepads = navigator.getGamepads();
+
+		for (const gamepad of gamepads) {
+			if (gamepad) {
+				handleJoystickInput(gamepad);
+			}
+		}
+
+		requestAnimationFrame(pollGamepad);
+	}
+
+	// Start polling for joystick input
+	pollGamepad();
+
+	// Event listeners for joystick connection/disconnection
+	window.addEventListener('gamepadconnected', handleJoystickConnection);
+	window.addEventListener('gamepaddisconnected', handleJoystickConnection);

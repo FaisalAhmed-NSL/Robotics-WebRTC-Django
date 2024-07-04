@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title_block %}Peer {% endblock %}
+
+{% block body_block %}
+{% load static %}
+
+<div class="top_heading">
+    <div class="row">
+        <div class=" col col-sm-5 m-auto">
+            <h1 id="label"> Welcome to Faceula Robot </h1>
+            <h1 id="label-username"> Username :</h1>
+        
+            <div>
+                <input id="username" style="border: none; font-size: larger;" readonly value={{user.username}}>
+                <br>
+                <button id="btn-join">Join Room</button>
+                <br>
+            </div>
+        </div>
+        <div class="col col-sm-7">
+            <div class="others-user" id="other-users">
+
+            </div>
+        </div>
+
+    </div>
+    <!-- <h1 id="label"> Welcome to Faceula Robot </h1>
+    <h1 id="label-username"> Username :</h1>
+
+    <div>
+        <input id="username" style="border: none; font-size: larger;" readonly value={{user.username}}>
+        <br>
+        <button id="btn-join">Join Room</button>
+        <br>
+    </div> -->
+</div>
+
+<hr>
+<br><Br>
+
+<div class="main-grid-container">
+
+
+    {% comment %} Video container {% endcomment %}
+    <div id="chat">
+        <h3> CHAT </h3>
+        <div id="messages">
+            <ul id="message-list"></ul>
+        </div>
+        <div id="ct">
+            <input id="msg">
+            <button id="btn-send-msg">Send Message</button>
+        </div>
+            <button id="btn-share-screen">Share Screen</button>
+            <button id="btn-record-screen">Record Screen</button>
+            <button class="view-button" id="share-file-button">Share File</button>
+
+        <div id="select-file-dialog" style="display: none;">
+            <div id="dialog-content">
+                <div id="select-file">
+                    <div id="label">Select a file:</div>
+                    <input type="file" id="select-file-input">
+                </div>
+                <div id="dialog-footer">
+                    <button id="ok-button" disabled>Ok</button>
+                    <button id="cancel-button" class="cancel-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="video-container">
+        <div class="video_tag">
+            <video id="local-video"  autoplay playsinline></video>
+            <br>
+
+            <div class="video-btn">
+                <button id="btn-toggle-audio1" class="btn btn-dark">Audio Mute</button>
+                <br>
+                <button id="btn-toggle-video1" class="btn btn-dark">Video Off</button>
+                <br>
+                <button id="btn-toggle-audio2" class="btn btn-dark" style="display: none;">Back Audio Mute</button>
+                <!-- <br> -->
+                <button id="btn-toggle-video2" class="btn btn-dark" style="display: none;">Back Video Off</button>
+            </div>
+        </div>
+        <div id="remote_users_video">
+        </div>
+    </div>
+    <!-- <button id="fullScreen">go to full screen</button> -->
+    
+    {% if role == "admin" %}
+    <div class="controller" id="controller">
+        <div class="hand-controller">
+
+            <div class="hand-group">
+                <label>
+                  <input  type="checkbox" name="hand" value="shoulder" /> Shoulder
+                </label>
+                <label>
+                  <input type="checkbox" name="hand" value="elbow" /> Elbow
+                </label>
+                <label>
+                  <input type="checkbox" name="hand" value="wrist" /> Wrist 
+                </label>
+                <label>
+                  <input type="checkbox" name="hand" value="claws" /> Claws
+                </label>
+                <button class="reset" id="top_reset">Reset</button>
+              </div>
+              
+              <div class="controller-group">
+                <div style="margin: auto;">
+                    <button class="controller-sew" disabled  id="moveup">Move Up</button>
+                </div>
+                <div>
+                    <button class="controller-sew" disabled  id="rotateleft">Rotate Left</button>
+                    <button value="grab" name="grab" style="visibility: hidden ;" id="clawstoggle">Grab</button>
+                    <button class="controller-sew" disabled id="rotateright">Rotate Right</button>
+
+                </div>
+                <div style="margin: auto;">
+                    <button class="controller-sew"  disabled id="movedown">Move Down</button>
+                </div>
+              </div>
+        </div>
+        {% comment %} changes start {% endcomment %}
+        <div>
+                <div class="a1" >
+                    <form method="POST" id="post_forward">
+                        {% csrf_token %}
+                        <input type="text" name="control" value="forward" placeholder="Enter value" style="display: none;" />
+                        <button type="button" id="forward-button">Forward</button>
+                    </form>
+                </div>
+            </div>
+        <div class="a2" >
+            <form method="POST" id="post_left">
+                {% csrf_token %}
+                <input type="text" name="control" value="left" placeholder="Enter value" style="display: none;" />
+                <button type="button" id="left-button">Left</button>
+            </form>
+
+            <form method="POST" id="post_stop" onsubmit="return false">
+                {% csrf_token %}
+                <input type="text" name="control" value="stop" placeholder="Enter value" style="display: none;" />
+                <button type="button" id="stop-button">Stop</button>
+            </form>
+
+            <form method="POST" id="post_right">
+                {% csrf_token %}
+                <input type="text" name="control" value="right" placeholder="Enter value" style="display: none;" />
+                <button type="button" id="right-button">Right</button>
+            </form>
+        </div>
+        <div class="a3" >
+            <form method="POST" id="post_reverse">
+                {% csrf_token %}
+
+                <input type="text" name="control" value="reverse" placeholder="Enter value" style="display: none;" />
+                <button type="button" id="reverse-button">Reverse</button>
+            </form>
+        </div>
+
+        <br>
+        <br>
+        <div class="servo" >
+
+            
+            <form method="POST" id="post_up">
+                {% csrf_token %}
+                <input type="text" name="control" value="up" placeholder="Enter value" style="display: none;" />
+                <button type="button" id="up-button"> Head Up</button>
+            </form>
+            <div class="servo_up_down">
+                <form method="POST" id="post_up">
+                    {% csrf_token %}
+                    <input type="text" name="control" value="head_left" placeholder="Enter value" style="display: none;" />
+                    <button type="button" id="head_left-button"> Head left</button>
+                </form>
+                <form method="POST" id="post_down">
+                    {% csrf_token %}
+                    <input type="text" name="control" value="head_reset" placeholder="Enter value" style="display: none;" />
+                    <button type="button" id="head_reset-button"> Reset</button>
+                </form>
+                <form method="POST" id="post_down">
+                    {% csrf_token %}
+                    <input type="text" name="control" value="head_right" placeholder="Enter value" style="display: none;" />
+                    <button type="button" id="head_right-button"> Head right</button>
+                </form>
+    
+                
+            </div>
+            <form method="POST" id="post_down">
+                {% csrf_token %}
+                <input type="text" name="control" value="down" placeholder="Enter value" style="display: none;" />
+                <button type="button" id="down-button"> Head Down</button>
+            </form>
+            
+        </div>
+        
+        </div>
+    </div>
+    {% endif %}
+    
+</div>
+
+{% endblock %}

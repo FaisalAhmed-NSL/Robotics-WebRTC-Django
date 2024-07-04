@@ -1,0 +1,471 @@
+
+	// Joystick controls
+
+	var arm = "righthand_";
+	var arm1 = "righthand_shoulder_";
+	var arm2 = "lefthand_shoulder_";
+	var joint = "shoulder_";
+	var stopped = true;
+	var left_gripper = true;
+	var left_gripper_state = true;
+	var right_gripper = true;
+	var right_gripper_state = true;
+	var stop_counter = 0;
+
+	// Function to handle joystick connection
+	function handleJoystickConnection(event) {
+		const joystickInputs = document.getElementById('joystick-inputs');
+
+		if (event.type === 'gamepadconnected') {
+			joystickInputs.style.display = 'block';
+		} else if (event.type === 'gamepaddisconnected') {
+			sendControl(`stop`);
+			joystickInputs.style.display = 'none';
+		}
+	}
+
+	// Function to handle joystick input
+	function handleJoystickInput(gamepad, mode) {
+		// Extract joystick input values
+		const axes = gamepad.axes;
+		const buttons = gamepad.buttons;
+		
+		// Display joystick inputs dynamically
+		const joystickInputs = document.getElementById('joystick-inputs');
+		joystickInputs.innerHTML = '<h2>Joystick Inputs</h2>';
+
+		// // Display buttons
+		// joystickInputs.innerHTML += '<ul>';
+		// for (let i = 0; i < buttons.length; i++) {
+		//     joystickInputs.innerHTML += `<li>Button ${i}: ${buttons[i].value}</li>`;
+		// }
+		// joystickInputs.innerHTML += '</ul>';
+
+		// // Display axes
+		// joystickInputs.innerHTML += '<ul>';
+		// for (let i = 0; i < axes.length; i++) {
+		//     joystickInputs.innerHTML += `<li>Axis ${i}: ${axes[i]}</li>`;
+		// }
+		// joystickInputs.innerHTML += '</ul>';
+
+		// Robot control logic based on joystick inputs
+		// Implement your control logic here based on axes and buttons
+
+		
+		// ARM MODE
+		if (mode === 17) {
+			joystickInputs.innerHTML = `Arm Control Mode`;
+			joystickInputs.style.color = "white";
+			joystickInputs.style.textShadow = "5px 5px 5px black";
+			joystickInputs.style.fontSize = "24px";
+
+			if (buttons[4].value === 0 && buttons[6].value === 0) {
+				arm1 = "lefthand_shoulder_";
+				// stop_counter = 0;
+			}
+			else if (buttons[4].value === 1 && buttons[6].value === 0) {
+				arm1 = "lefthand_elbow_";
+				// stop_counter = 0;
+			}
+			else if (buttons[6].value > 0) {
+				arm1 = "lefthand_wrist_";
+				// stop_counter = 0;
+			}
+
+			if (buttons[5].value === 0 && buttons[7].value === 0) {
+				arm2 = "righthand_shoulder_";
+				// stop_counter = 0;
+			}
+			else if (buttons[5].value === 1 && buttons[7].value === 0) {
+				arm2 = "righthand_elbow_";
+				// stop_counter = 0;
+			}
+			else if (buttons[7].value > 0.3) {
+				arm2 = "righthand_wrist_";
+				// stop_counter = 0;
+			}
+
+			if (axes[1] < -0.5) {
+				sendControl(`${arm1}moveup`);
+				stopped = false;
+				stop_counter = 0;
+
+			}
+			else if (axes[1] > 0.5) {
+				sendControl(`${arm1}movedown`);
+				stopped = false;
+				stop_counter = 0;
+
+			}
+			if (axes[0] < -0.5) {
+				sendControl(`${arm1}rotateleft`);
+				stopped = false;
+				stop_counter = 0;
+
+			}
+			else if (axes[0] > 0.5) {
+				sendControl(`${arm1}rotateright`);
+				stopped = false;
+				stop_counter = 0;
+
+			}
+
+			if (axes[3] < -0.5) {
+				sendControl(`${arm2}moveup`);
+				stopped = false;
+				stop_counter = 0;
+
+			}
+			else if (axes[3] > 0.5) {
+				sendControl(`${arm2}movedown`);
+				stopped = false;
+				stop_counter = 0;
+
+			}
+			if (axes[2] < -0.5) {
+				sendControl(`${arm2}rotateleft`);
+				stopped = false;
+				stop_counter = 0;
+
+			}
+			else if (axes[2] > 0.5) {
+				sendControl(`${arm2}rotateright`);
+				stopped = false;
+				stop_counter = 0;
+
+			}
+
+
+			if (buttons[10].value === 1) {
+				sendControl(`arm_reset`);
+				right_gripper === false;
+				left_gripper === false;
+				left_gripper_state = false;
+				right_gripper_state = false;
+				stopped = false;
+				stop_counter = 0;
+			}
+			if (buttons[11].value === 1) {
+				sendControl(`head_reset`);
+				stopped = false;
+				stop_counter = 0;
+			}
+
+			if (buttons[12].value === 1 && buttons[13].value === 0 && buttons[14].value === 0 && buttons[15].value === 0) {
+				stopped = false;
+				sendControl(`up`);
+				stop_counter = 0;
+
+			}
+			else if (buttons[12].value === 0 && buttons[13].value === 1 && buttons[14].value === 0 && buttons[15].value === 0) {
+				stopped = false;
+				sendControl(`down`);
+				stop_counter = 0;
+
+			}
+			else if (buttons[12].value === 0 && buttons[13].value === 0 && buttons[14].value === 1 && buttons[15].value === 0) {
+				stopped = false;
+				sendControl(`head_left`);
+				stop_counter = -100;
+			}
+			else if (buttons[12].value === 0 && buttons[13].value === 0 && buttons[14].value === 0 && buttons[15].value === 1) {
+				stopped = false;
+				sendControl(`head_right`);
+				stop_counter = -100;
+			}
+
+			if (buttons[10].value === 1 && buttons[11].value === 1) {
+				sendControl(`arm_reset`);
+				sendControl(`camera_hard_reset`);
+				sendControl(`stop`);
+				right_gripper === false;
+				left_gripper === false;
+				left_gripper_state = false;
+				right_gripper_state = false;
+				stopped = true;
+				stop_counter = 0;
+			}
+
+
+
+			if (stopped === true) {
+
+				if (buttons[6].value === 1 && left_gripper_state === false) {
+					left_gripper = !left_gripper;
+
+					if (left_gripper === false) {
+						sendControl(`lefthand_release`);
+					}
+
+					else if (left_gripper === true) {
+						sendControl(`lefthand_grab`);
+					}
+					left_gripper_state = true
+					stopped = false;
+					stop_counter = 0;
+				}
+				else if (buttons[6].value < 0.9) {
+					left_gripper_state = false;
+
+				}
+
+				if (buttons[7].value === 1 && right_gripper_state === false) {
+					right_gripper = !right_gripper;
+
+					if (right_gripper === false) {
+						sendControl(`righthand_release`);
+					}
+
+					else if (right_gripper === true) {
+						sendControl(`righthand_grab`);
+					}
+					right_gripper_state = true;
+					stopped = false;
+					stop_counter = 0;
+				}
+				else if (buttons[7].value < 0.9) {
+					right_gripper_state = false;
+
+				}
+
+			}
+
+			else if (axes[0] === 0.0 && axes[1] === 0.0 && axes[2] === 0.0 && axes[3] === 0.0 && buttons[6].value <= 0.9 && buttons[7].value <= 0.9 && buttons[12].value === 0.0 && buttons[13].value === 0.0 && buttons[14].value === 0.0 && buttons[15].value === 0.0 && buttons[0].value === 0 && buttons[1].value === 0 && buttons[2].value === 0 && buttons[3].value === 0 && stopped === false) {
+
+				sendControl(`stop`);
+				stop_counter += 1;
+				if (stop_counter >= 5) {
+					stopped = true;
+				}
+
+			}
+		}
+
+
+		// NO MODE
+		else if (mode === 14) {
+			joystickInputs.innerHTML = `Invalid Mode`;
+			joystickInputs.style.color = "red";
+			joystickInputs.style.textShadow = "5px 5px 5px black";
+			joystickInputs.style.fontSize = "24px";
+			console.log(`Invalid Mode`)
+		}
+
+		// FULL BODY MODE
+		else if (mode === 15) {
+			joystickInputs.innerHTML = `Full Body Mode`;
+			joystickInputs.style.color = "white";
+			joystickInputs.style.textShadow = "5px 5px 5px black";
+			joystickInputs.style.fontSize = "24px";
+
+			if (axes[0] < -0.5) {
+				sendControl(`left`);
+				stopped = false;
+				stop_counter = 0;
+			}
+			else if (axes[0] > 0.5) {
+				sendControl(`right`);
+				stopped = false;
+				stop_counter = 0;
+			}
+			if (axes[1] < -0.5) {
+				sendControl(`forward`);
+				stopped = false;
+				stop_counter = 0;
+			}
+			else if (axes[1] > 0.5) {
+				sendControl(`reverse`);
+				stopped = false;
+				stop_counter = 0;
+			}
+			if (axes[1] < -0.5 && axes[0] < -0.5) {
+				sendControl(`forward_left`);
+				stopped = false;
+				stop_counter = 0;
+			}
+			if (axes[1] < -0.5 && axes[0] > 0.5) {
+				sendControl(`forward_right`);
+				stopped = false;
+				stop_counter = 0;
+			}
+			if (axes[1] > 0.5 && axes[0] < -0.5) {
+				sendControl(`reverse_left`);
+				stopped = false;
+				stop_counter = 0;
+			}
+			if (axes[1] > 0.5 && axes[0] > 0.5) {
+				sendControl(`reverse_right`);
+				stopped = false;
+			}
+			if (axes[3] < -0.5) {
+				stopped = false;
+				sendControl(`up`);
+				stop_counter = 0;
+
+			}
+			else if (axes[3] > 0.5) {
+				stopped = false;
+				sendControl(`down`);
+				stop_counter = 0;
+
+			}
+			if (axes[2] < -0.5) {
+				stopped = false;
+				sendControl(`head_left`);
+				stop_counter = -100;
+			}
+			else if (axes[2] > 0.5) {
+				stopped = false;
+				sendControl(`head_right`);
+				stop_counter = -100;
+			}
+
+			if (buttons[6].value === 1) {
+				arm = "lefthand_";
+				stop_counter = 0;
+			}
+			if (buttons[7].value === 1) {
+				arm = "righthand_";
+				stop_counter = 0;
+			}
+			if (buttons[4].value === 1) {
+				joint = "shoulder_";
+				stop_counter = 0;
+			}
+			if (buttons[1].value === 1) {
+				joint = "elbow_";
+				stop_counter = 0;
+			}
+			if (buttons[0].value === 1) {
+				joint = "wrist_";
+				stop_counter = 0;
+			}
+			if (buttons[3].value === 1) {
+				sendControl(`stop`);
+				stopped = true;
+				stop_counter = 20;
+			}
+
+			if (buttons[13].value === 1) {
+				sendControl(`arm_reset`);
+				right_gripper === false;
+				left_gripper === false;
+				left_gripper_state = false;
+				right_gripper_state = false;
+				stopped = false;
+				stop_counter = 0;
+			}
+			if (buttons[14].value === 1) {
+				sendControl(`head_reset`);
+				stopped = false;
+				stop_counter = 0;
+			}
+			if (buttons[13].value === 1 && buttons[14].value === 1) {
+				sendControl(`arm_reset`);
+				sendControl(`camera_hard_reset`);
+				sendControl(`stop`);
+				right_gripper === false;
+				left_gripper === false;
+				left_gripper_state = false;
+				right_gripper_state = false;
+				stopped = true;
+				stop_counter = 0;
+			}
+			else if (axes[7] === -1.0) {
+				sendControl(`${arm}${joint}moveup`);
+				stopped = false;
+				stop_counter = 0;
+			}
+			else if (axes[7] === 1.0) {
+				sendControl(`${arm}${joint}movedown`);
+				stopped = false;
+				stop_counter = 0;
+			}
+			else if (axes[6] === -1.0) {
+				sendControl(`${arm}${joint}rotateleft`);
+				stopped = false;
+				stop_counter = 0;
+			}
+			else if (axes[6] === 1.0) {
+				sendControl(`${arm}${joint}rotateright`);
+				stopped = false;
+				stop_counter = 0;
+			}
+
+			if (stopped === true) {
+
+				if (axes[5] === 1.0 && left_gripper_state === false) {
+					left_gripper = !left_gripper;
+
+					if (left_gripper === false) {
+						sendControl(`lefthand_release`);
+					}
+
+					else if (left_gripper === true) {
+						sendControl(`lefthand_grab`);
+					}
+					left_gripper_state = true
+					stopped = false;
+					stop_counter = 0;
+				}
+				else if (axes[5] < 0.5) {
+					left_gripper_state = false;
+
+				}
+
+				if (axes[4] === 1.0 && right_gripper_state === false) {
+					right_gripper = !right_gripper;
+
+					if (right_gripper === false) {
+						sendControl(`righthand_release`);
+					}
+
+					else if (right_gripper === true) {
+						sendControl(`righthand_grab`);
+					}
+					right_gripper_state = true;
+					stopped = false;
+					stop_counter = 0;
+				}
+				else if (axes[4] < 0.5) {
+					right_gripper_state = false;
+
+				}
+
+			}
+
+			else if (axes[0] === 0.0 && axes[1] === 0.0 && axes[2] === 0.0 && axes[3] === 0.0 && axes[4] <= 0.0 && axes[5] <= 0.0 && axes[6] === 0.0 && axes[7] === 0.0 && buttons[13].value === 0.0 && buttons[14].value === 0.0 && buttons[6].value === 0.0 && buttons[7].value === 0.0 && stopped === false) {
+
+				sendControl(`stop`);
+				stop_counter += 1;
+				if (stop_counter >= 5) {
+					stopped = true;
+				}
+
+			}
+		}
+	
+	}
+
+	// Function to continuously poll and handle joystick input
+	function pollGamepad() {
+		const gamepads = navigator.getGamepads();
+
+		for (const gamepad of gamepads) {
+			if (gamepad) {
+
+				handleJoystickInput(gamepad, gamepad.buttons.length);
+				// console.log(gamepad.buttons.length);
+
+			}
+		}
+
+		requestAnimationFrame(pollGamepad);
+	}
+
+	// Start polling for joystick input
+	pollGamepad();
+
+	// Event listeners for joystick connection/disconnection
+	window.addEventListener('gamepadconnected', handleJoystickConnection);
+	window.addEventListener('gamepaddisconnected', handleJoystickConnection);

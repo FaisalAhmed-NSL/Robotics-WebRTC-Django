@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html lang="en">
+
+<head>
+	<script src="https://code.jquery.com/jquery-3.6.0.js"
+		integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+	{% comment %}
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"
+		integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8" crossorigin="anonymous"></script> {% endcomment
+	%}
+	<meta charset="UTF-8">
+	<title>Faceula Robot</title>
+	<link rel="stylesheet" type="text/css" href="{% static '/css/main.css' %}">
+</head>
+
+<body>
+	<h1 id="label">Welcome to Faceula Robot</h1>
+	<h1 id="label-username">Username :</h1>
+
+	<div>
+		<input id="username">
+		<br>
+		<button id="btn-join">Join Room</button>
+		<br>
+	</div>
+	<hr>
+	<br><Br>
+
+
+	<div class="main-grid-container">
+
+
+		{% comment %} Video container {% endcomment %}
+		<div id="video-container">
+			<div><video id="local-video" style="float: left;" autoplay playsinline></video></div>
+			<button id="btn-toggle-audio" class="btn btn-dark">Audio Mute</button>
+			<br>
+			<button id="btn-toggle-video" class="btn btn-dark">Video Off</button>
+		</div>
+
+		<div id="chat">
+			<h3> CHAT </h3>
+			<div id="messages">
+				<ul id="message-list"></ul>
+			</div>
+			<div id="ct"><input id="msg"><button id="btn-send-msg">send</button></div>
+			<button id="btn-share-screen">Share Screen</button>
+			<button id="btn-record-screen">Record Screen</button>
+			<button class="view-button" id="share-file-button">Share File</button>
+			<div id="select-file-dialog" style="display: none;">
+				<div id="dialog-content">
+					<div id="select-file">
+						<div id="label">Select a file:</div>
+						<input type="file" id="select-file-input">
+					</div>
+					<div id="dialog-footer">
+						<button id="ok-button" disabled>Ok</button>
+						<button id="cancel-button" class="cancel-button">Cancel</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		
+		<div class="controller"></div>
+		<div class="a1" style="display: flex; justify-content: center">
+			<form method="POST" id="post_forward">
+				{% csrf_token %}
+				<input type="text" name="control" value="forward" placeholder="Enter value" style="display: none;" />
+				<button type="button" id="forward-button">Forward</button>
+			</form>
+		</div>
+		<div class="a2" style="display:flex">
+			<form method="POST" id="post_left">
+				{% csrf_token %}
+				<input type="text" name="control" value="left" placeholder="Enter value" style="display: none;" />
+				<button type="button" id="left-button">Left</button>
+			</form>
+
+			<form method="POST" id="post_stop" onsubmit="return false">
+				{% csrf_token %}
+				<input type="text" name="control" value="stop" placeholder="Enter value" style="display: none;" />
+				<button type="button" id="stop-button">Stop</button>
+			</form>
+
+			<form method="POST" id="post_right">
+				{% csrf_token %}
+				<input type="text" name="control" value="right" placeholder="Enter value" style="display: none;" />
+				<button type="button" id="right-button">Right</button>
+			</form>
+		</div>
+		<div class="a3" style="display: flex; justify-content: center">
+			<form method="POST" id="post_reverse">
+				{% csrf_token %}
+
+				<input type="text" name="control" value="reverse" placeholder="Enter value" style="display: none;" />
+				<button type="button" id="reverse-button">Reverse</button>
+			</form>
+		</div>
+
+		<div class="servo" tyle="display: flex; justify-content: center">
+			<form method="POST" id="post_up">
+				{% csrf_token %}
+				<input type="text" name="control" value="up" placeholder="Enter value" style="display: none;" />
+				<button type="button" id="up-button"> Head UP</button>
+			</form>
+			<form method="POST" id="post_down">
+				{% csrf_token %}
+				<input type="text" name="control" value="down" placeholder="Enter value" style="display: none;" />
+				<button type="button" id="down-button"> Head Down</button>
+			</form>
+		</div>
+	</div>
+	</div>
+
+	{% block content %}
+	{% endblock %}
+</body>
+
+
+
+
+{% comment %} # Control the Robot movement without rendaring . {% endcomment %}
+<script>
+
+	function sendControl(controlValue) {
+		$.ajax({
+		  type: "POST",
+		  url: "",
+		  data: {
+			control: controlValue,
+			csrfmiddlewaretoken: "{{ csrf_token }}"
+		  }
+		});
+	  }
+	  
+	  // Add the event handlers for all of the buttons
+	  document.getElementById('forward-button').addEventListener('mousedown', () => sendControl('forward'));
+	  document.getElementById('forward-button').addEventListener('mouseup', () => sendControl('stop'));
+	  document.getElementById('forward-button').addEventListener('touchstart', () => sendControl('forward'));
+	  document.getElementById('forward-button').addEventListener('touchend', () => sendControl('stop'));
+
+	  document.getElementById('left-button').addEventListener('mousedown', () => sendControl('left'));
+	  document.getElementById('left-button').addEventListener('mouseup', () => sendControl('stop'));
+	  document.getElementById('left-button').addEventListener('touchstart', () => sendControl('left'));
+	  document.getElementById('left-button').addEventListener('touchend', () => sendControl('stop'));
+
+	  document.getElementById('stop-button').addEventListener('mousedown', () => sendControl('stop'));
+	  document.getElementById('stop-button').addEventListener('mouseup', () => sendControl('stop'));
+	  document.getElementById('stop-button').addEventListener('touchstart', () => sendControl('stop'));
+	  document.getElementById('stop-button').addEventListener('touchend', () => sendControl('stop'));
+
+	  document.getElementById('right-button').addEventListener('mousedown', () => sendControl('right'));
+	  document.getElementById('right-button').addEventListener('mouseup', () => sendControl('stop'));
+	  document.getElementById('right-button').addEventListener('touchstart', () => sendControl('right'));
+	  document.getElementById('right-button').addEventListener('touchend', () => sendControl('stop'));
+
+	  document.getElementById('reverse-button').addEventListener('mousedown', () => sendControl('reverse'));
+	  document.getElementById('reverse-button').addEventListener('mouseup', () => sendControl('stop'));
+	  document.getElementById('reverse-button').addEventListener('touchstart', () => sendControl('reverse'));
+	  document.getElementById('reverse-button').addEventListener('touchend', () => sendControl('stop'));
+
+	  document.getElementById('up-button').addEventListener('mousedown', () => sendControl('up'));
+	  document.getElementById('up-button').addEventListener('mouseup', () => sendControl('stop'));
+	  document.getElementById('up-button').addEventListener('touchstart', () => sendControl('up'));
+	  document.getElementById('up-button').addEventListener('touchend', () => sendControl('stop'));
+
+	  document.getElementById('down-button').addEventListener('mousedown', () => sendControl('down'));
+	  document.getElementById('down-button').addEventListener('mouseup', () => sendControl('stop'));
+	  document.getElementById('down-button').addEventListener('touchstart', () => sendControl('down'));
+	  document.getElementById('down-button').addEventListener('touchend', () => sendControl('stop'));
+
+
+
+</script>
+
+</html>
+
+
+
+
+
+
+
+
+
+<div id="joystick-inputs"></div>
+
+script:
+
+	// Joystick controls
+
+	var arm = "righthand_";
+	var joint = "shoulder_";
+	var stopped = true;
+	var left_gripper = true;
+	var right_gripper = true;
+
+	// Function to handle joystick connection
+	function handleJoystickConnection(event) {
+		const joystickInputs = document.getElementById('joystick-inputs');
+
+		if (event.type === 'gamepadconnected') {
+			joystickInputs.style.display = 'block';
+		} else if (event.type === 'gamepaddisconnected') {
+			joystickInputs.style.display = 'none';
+		}
+	}
+
+	// Function to handle joystick input
+	function handleJoystickInput(gamepad) {
+		// Extract joystick input values
+		const axes = gamepad.axes;
+		const buttons = gamepad.buttons;
+
+		// // Display joystick inputs dynamically
+		// const joystickInputs = document.getElementById('joystick-inputs');
+		// joystickInputs.innerHTML = '<h2>Joystick Inputs</h2>';
+
+		// // Display buttons
+		// joystickInputs.innerHTML += '<ul>';
+		// for (let i = 0; i < buttons.length; i++) {
+		//     joystickInputs.innerHTML += `<li>Button ${i}: ${buttons[i].value}</li>`;
+		// }
+		// joystickInputs.innerHTML += '</ul>';
+
+		// // Display axes
+		// joystickInputs.innerHTML += '<ul>';
+		// for (let i = 0; i < axes.length; i++) {
+		//     joystickInputs.innerHTML += `<li>Axis ${i}: ${axes[i]}</li>`;
+		// }
+		// joystickInputs.innerHTML += '</ul>';
+
+		// Robot control logic based on joystick inputs
+		// Implement your control logic here based on axes and buttons
+
+		if (axes[0] < -0.5) {
+			sendControl(`left`);
+			stopped = false;
+		}
+		else if (axes[0] > 0.5) {
+			sendControl(`right`);
+			stopped = false;
+		}
+		if (axes[1] < -0.5) {
+			sendControl(`forward`);
+			stopped = false;
+		}
+		else if (axes[1] > 0.5) {
+			sendControl(`reverse`);
+			stopped = false;
+		}
+		if (axes[1] < -0.5 && axes[0] < -0.5) {
+			sendControl(`forward_left`);
+			stopped = false;
+		}
+		if (axes[1] < -0.5 && axes[0] > 0.5) {
+			sendControl(`forward_right`);
+			stopped = false;
+		}
+		if (axes[1] > 0.5 && axes[0] < -0.5) {
+			sendControl(`reverse_left`);
+			stopped = false;
+		}
+		if (axes[1] > 0.5 && axes[0] > 0.5) {
+			sendControl(`reverse_right`);
+			stopped = false;
+		}
+		if (axes[3] < -0.5) {
+			stopped = false;
+			sendControl(`up`);
+
+		}
+		else if (axes[3] > 0.5) {
+			stopped = false;
+			sendControl(`down`);
+
+		}
+		if (axes[2] < -0.5) {
+			stopped = false;
+			sendControl(`head_left`);
+		}
+		else if (axes[2] > 0.5) {
+			stopped = false;
+			sendControl(`head_right`);
+		}
+
+		if (buttons[4].value === 1) {
+			arm = "lefthand_";
+		}
+		if (buttons[5].value === 1) {
+			arm = "righthand_";
+		}
+		if (buttons[3].value === 1) {
+			joint = "shoulder_";
+		}
+		if (buttons[1].value === 1) {
+			joint = "elbow_";
+		}
+		if (buttons[0].value === 1) {
+			joint = "wrist_";
+		}
+
+		if (buttons[10].value === 1) {
+			sendControl(`arm_reset`);
+			stopped = false;
+		}
+		if (buttons[11].value === 1) {
+			sendControl(`head_reset`);
+			stopped = false;
+		}
+		if (buttons[10].value === 1 && buttons[11].value === 1) {
+			sendControl(`arm_reset`);
+			sendControl(`camera_hard_reset`);
+			sendControl(`stop`);
+			stopped = true;
+		}
+		else if (buttons[12].value === 1) {
+			sendControl(`${arm}${joint}moveup`);
+			stopped = false;
+		}
+		else if (buttons[13].value === 1) {
+			sendControl(`${arm}${joint}movedown`);
+			stopped = false;
+		}
+		else if (buttons[14].value === 1) {
+			sendControl(`${arm}${joint}rotateleft`);
+			stopped = false;
+		}
+		else if (buttons[15].value === 1) {
+			sendControl(`${arm}${joint}rotateright`);
+			stopped = false;
+		}
+
+		if (buttons[6].value === 1.0) {
+			left_gripper = !left_gripper;
+
+			if (left_gripper === false) {
+			sendControl(`lefthand_release`);
+			}
+
+			else if (left_gripper === true) {
+				sendControl(`lefthand_grab`);
+			}
+
+			stopped = false;
+		}
+
+		if (buttons[7].value === 1.0) {
+			right_gripper = !right_gripper;
+
+			if (right_gripper === false) {
+				sendControl(`righthand_release`);
+			}
+
+			else if (right_gripper === true) {
+				sendControl(`righthand_grab`);
+			}
+
+			stopped = false;
+		}
+
+		else if (axes[0] === 0.0 && axes[1] === 0.0 && axes[2] === 0.0 && axes[3] === 0.0 && stopped === false) {
+
+			sendControl(`stop`);
+			stopped = true;
+
+		}
+
+
+	}
+
+	// Function to continuously poll and handle joystick input
+	function pollGamepad() {
+		const gamepads = navigator.getGamepads();
+
+		for (const gamepad of gamepads) {
+			if (gamepad) {
+				handleJoystickInput(gamepad);
+			}
+		}
+
+		requestAnimationFrame(pollGamepad);
+	}
+
+	// Start polling for joystick input
+	pollGamepad();
+
+	// Event listeners for joystick connection/disconnection
+	window.addEventListener('gamepadconnected', handleJoystickConnection);
+	window.addEventListener('gamepaddisconnected', handleJoystickConnection);
+
+
+
+
+
+Semester 1: Introduction to Robotics (Months 1-6)
+
+Month 1-2: Basics of Robotics
+
+Class 1: Introduction to robotics and its applications.
+Class 2: Understanding robots, sensors, and actuators.
+Class 3: Building simple robots with everyday materials (e.g., cardboard and paper).
+Month 3-4: Coding Fundamentals
+4. Class 4: Introduction to block-based coding (e.g., Scratch).
+
+Class 5: Coding simple commands for robot movement.
+Class 6: Hands-on coding and testing of simple robots.
+Month 5-6: Simple Robot Projects with Progressive Improvement
+7. Class 7: Building and programming a spinning motor robot.
+
+Class 8: Adding a battery for power and solving basic mobility issues.
+Class 9: Introduction to wheel-based movement for improved control.
+Class 10: Semester 1 recap and project showcase.
+
+
+Semester 2: Intermediate Robotics (Months 7-12)
+
+Month 1-2: Intermediate Coding
+
+Class 1: Introduction to Python programming.
+Class 2: Python basics and variables.
+Class 3: Coding loops and conditions.
+Month 3-4: More Complex Robots
+4. Class 4: Building a simple car robot with wheels.
+
+Class 5: Adding motor control to the car.
+Class 6: Solving issues related to the car's mobility.
+Month 5-6: Robot Challenges with Progressive Improvement
+7. Class 7: Robot maze-solving challenge using the car.
+
+Class 8: Enhancing car's capabilities with sensors for obstacle avoidance.
+Class 9: Programming the car for basic autonomous movement.
+Class 10: Semester 2 recap and project showcase.
+
+
+Semester 3: Advanced Robotics (Months 13-18)
+
+Month 1-2: Advanced Coding
+
+Class 1: Intermediate Python programming.
+Class 2: Functions and modular programming.
+Class 3: Object-oriented programming concepts.
+Month 3-4: Advanced Sensors and Actuators
+4. Class 4: Introduction to more advanced sensors (e.g., color sensors).
+
+Class 5: Advanced actuator control (e.g., servos).
+Class 6: Building a robot with multiple sensors and actuators.
+Month 5-6: Robotics Projects with Progressive Improvement
+7. Class 7: Developing a robotic arm for the car.
+
+Class 8: Integrating color sensors for object recognition.
+Class 9: Advanced programming for precise control.
+Class 10: Semester 3 recap and project showcase.
+
+
+Semester 4: Robotics Mastery (Months 19-24)
+
+Month 1-2: Advanced Programming
+
+Class 1: Advanced Python programming techniques.
+Class 2: Working with external libraries and APIs.
+Class 3: Developing complex robot control software.
+Month 3-4: Final Robot Projects with Progressive Improvement
+4. Class 4: Group project - designing and building an autonomous robot car.
+
+Class 5: Enhancing the autonomous capabilities and obstacle avoidance.
+Class 6: Fine-tuning the robot for advanced maneuvers.
+Month 5-6: Robotics Exhibition
+7. Class 7: Preparing presentations on group projects.
+
+Class 8: Hosting a robotics exhibition for parents and classmates.
+Class 9: Reflecting on the journey and future possibilities.
+Class 10: Graduation and celebration.
+
+
+
+
+
+
+
+##############333
+#!/home/nsl-nano2/archiconda3/bin/python3
+
+
+import paho.mqtt.client as mqtt
+import json
+import serial
+import subprocess
+import time
+
+ip = '27.147.235.178'
+port = 8083
+
+subprocess.run(['gnome-terminal', '--', 'chromium-browser', 'http://{}:{}'.format(ip, port)])
+
+# Constants
+MQTT_TOPIC = "home/arduino"
+ARDUINO_COMMANDS = {
+    "stop": [0],
+    "forward": [1],
+    "reverse": [2],
+    "left": [3],
+    "right": [4],
+    "up": [5],
+    "down": [6],
+    "head_left": [7],
+    "head_right": [8],
+    "head_reset": [9],
+    "camera_hard_reset" : [10],
+    "look_at_left_arm": [11],
+    "look_at_right_arm": [12],
+    "forward_left": [13],
+    "forward_right": [14],
+    "reverse_left": [15],
+    "reverse_right": [16],
+    "righthand_shoulder_moveup" : [17],
+    "righthand_shoulder_movedown" : [18],
+    "righthand_shoulder_rotateleft" : [19],
+    "righthand_shoulder_rotateright" : [20],
+    "righthand_elbow_moveup" : [21],
+    "righthand_elbow_movedown" : [22],
+    "righthand_elbow_rotateleft" : [23],
+    "righthand_elbow_rotateright" : [24],
+    "righthand_wrist_moveup" : [25],
+    "righthand_wrist_movedown" : [26],
+    "righthand_wrist_rotateleft" : [27],
+    "righthand_wrist_rotateright" : [28],
+    "righthand_release" : [29],
+    "righthand_grab" : [30],
+    "lefthand_shoulder_moveup" : [31],
+    "lefthand_shoulder_movedown" : [32],
+    "lefthand_shoulder_rotateleft" : [33],
+    "lefthand_shoulder_rotateright" : [34],
+    "lefthand_elbow_moveup" : [35],
+    "lefthand_elbow_movedown" : [36],
+    "lefthand_elbow_rotateleft" : [37],
+    "lefthand_elbow_rotateright" : [38],
+    "lefthand_wrist_moveup" : [39],
+    "lefthand_wrist_movedown" : [40],
+    "lefthand_wrist_rotateleft" : [41],
+    "lefthand_wrist_rotateright" : [42],
+    "lefthand_release" : [43],
+    "lefthand_grab" : [44],
+    "arm_reset" : [45]
+    
+}
+
+def initConnection(portNo, baudRate):
+    try:
+        ser = serial.Serial(portNo, baudRate)
+        print("Device Connected")
+        return ser
+    except serial.SerialException:
+        print("Failed to connect to device")
+
+def sendData(se, data, digits):
+    myString = "$"
+    for d in data:
+        myString += str(d).zfill(digits)
+    try:
+        se.write(myString.encode())
+        print(myString)
+    except serial.SerialException:
+        print("Failed to transmit data")
+
+def direction(d):
+    if d in ARDUINO_COMMANDS:
+        command = ARDUINO_COMMANDS[d]
+        print(d)
+        sendData(ser, command, 2)
+    else:
+        print('Invalid direction')
+
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print(f"Connected to broker at {client._host}:{client._port}")
+        client.subscribe(MQTT_TOPIC)
+    else:
+        sendData(ser, ARDUINO_COMMANDS["stop"], 2)
+        print(f"Connection to broker at {client._host}:{client._port} failed with error code {rc}")
+        print("Trying to connect again in 5 seconds")
+        time.sleep(5)
+        client.reconnect()
+
+def on_disconnect(client, userdata, rc):
+    if rc != 0:
+        sendData(ser, ARDUINO_COMMANDS["stop"], 2)
+        print(f"Disconnected from broker at {client._host}:{client._port}. Trying to reconnect...")
+        client.reconnect()
+
+def on_message(client, userdata, message):
+    print("Received message:", message.payload)
+    try:
+        payload = json.loads(message.payload.decode('utf-8'))
+        direction(payload['direction'])
+    except (json.JSONDecodeError, KeyError):
+        direction(message.payload.decode('utf-8').strip())
+
+# Try to connect to the MQTT broker
+connected = False
+while not connected:
+    try:
+        # Use context manager for serial communication
+        with serial.Serial("/dev/ttyACM0", 9600) as ser:
+            # Initialize MQTT client and connect to broker
+            client = mqtt.Client()
+            client.on_connect = on_connect
+            client.on_disconnect = on_disconnect
+            client.on_message = on_message
+            client.connect("172.16.16.54", 1883, 60)
+
+            # Start the main loop
+            client.loop_forever()
+
+            sendData(ser, ARDUINO_COMMANDS["stop"], 2)
+            # Close the serial connection
+            ser.close()
+        connected = True
+    except ConnectionRefusedError:
+        # Use context manager for serial communication
+        with serial.Serial("/dev/ttyACM0", 9600) as ser:
+            sendData(ser, ARDUINO_COMMANDS["stop"], 2)
+
+            # Close the serial connection
+            ser.close()
+        print("Could not connect to MQTT broker")
+        print("Trying to connect again in 5 seconds")
+        time.sleep(5)
+
+
+
+
+"v=0
+o=- 3453831277990037881 2 IN IP4 127.0.0.1
+s=-
+t=0 0
+a=group:BUNDLE 0 1 2 3
+a=extmap-allow-mixed
+a=msid-semantic: WMS 77c16639-81c2-4f33-8806-0e0a25ebb9d0
+m=audio 54383 UDP/TLS/RTP/SAVPF 111 63 9 0 8 13 110 126
+c=IN IP4 172.16.16.54
+a=rtcp:9 IN IP4 0.0.0.0
+a=candidate:1548141803 1 udp 2122260223 172.16.16.54 54383 typ host generation 0 network-id 1
+a=ice-ufrag:GhyM
+a=ice-pwd:ao0WZaXKPtuG0tbJx+ywDdO7
+a=ice-options:trickle
+a=fingerprint:sha-256 C7:EB:96:6D:5D:FA:B7:58:92:C0:B8:1B:2B:63:49:85:1F:5E:32:A9:4B:2F:65:63:AC:46:05:1A:FE:CD:13:55
+a=setup:active
+a=mid:0
+a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid
+a=sendrecv
+a=msid:77c16639-81c2-4f33-8806-0e0a25ebb9d0 6becba6e-9f2b-4fc6-9ef4-3a30d58d43bb
+a=rtcp-mux
+a=rtpmap:111 opus/48000/2
+a=rtcp-fb:111 transport-cc
+a=fmtp:111 minptime=10;useinbandfec=1
+a=rtpmap:63 red/48000/2
+a=fmtp:63 111/111
+a=rtpmap:9 G722/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+a=rtpmap:13 CN/8000
+a=rtpmap:110 telephone-event/48000
+a=rtpmap:126 telephone-event/8000
+a=ssrc:178439871 cname:9QybpVYbfNiliuN8
+m=video 9 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
+a=ice-ufrag:GhyM
+a=ice-pwd:ao0WZaXKPtuG0tbJx+ywDdO7
+a=ice-options:trickle
+a=fingerprint:sha-256 C7:EB:96:6D:5D:FA:B7:58:92:C0:B8:1B:2B:63:49:85:1F:5E:32:A9:4B:2F:65:63:AC:46:05:1A:FE:CD:13:55
+a=setup:active
+a=mid:1
+a=extmap:14 urn:ietf:params:rtp-hdrext:toffset
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=extmap:13 urn:3gpp:video-orientation
+a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+a=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay
+a=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type
+a=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing
+a=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space
+a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id
+a=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id
+a=sendrecv
+a=msid:77c16639-81c2-4f33-8806-0e0a25ebb9d0 a81db0bd-022d-4712-83a6-7f2a08ab24fd
+a=rtcp-mux
+a=rtcp-rsize
+a=rtpmap:96 VP8/90000
+a=rtcp-fb:96 goog-remb
+a=rtcp-fb:96 transport-cc
+a=rtcp-fb:96 ccm fir
+a=rtcp-fb:96 nack
+a=rtcp-fb:96 nack pli
+a=rtpmap:97 rtx/90000
+a=fmtp:97 apt=96
+a=rtpmap:102 H264/90000
+a=rtcp-fb:102 goog-remb
+a=rtcp-fb:102 transport-cc
+a=rtcp-fb:102 ccm fir
+a=rtcp-fb:102 nack
+a=rtcp-fb:102 nack pli
+a=fmtp:102 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42001f
+a=rtpmap:103 rtx/90000
+a=fmtp:103 apt=102
+a=rtpmap:104 H264/90000
+a=rtcp-fb:104 goog-remb
+a=rtcp-fb:104 transport-cc
+a=rtcp-fb:104 ccm fir
+a=rtcp-fb:104 nack
+a=rtcp-fb:104 nack pli
+a=fmtp:104 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42001f
+a=rtpmap:105 rtx/90000
+a=fmtp:105 apt=104
+a=rtpmap:106 H264/90000
+a=rtcp-fb:106 goog-remb
+a=rtcp-fb:106 transport-cc
+a=rtcp-fb:106 ccm fir
+a=rtcp-fb:106 nack
+a=rtcp-fb:106 nack pli
+a=fmtp:106 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f
+a=rtpmap:107 rtx/90000
+a=fmtp:107 apt=106
+a=rtpmap:108 H264/90000
+a=rtcp-fb:108 goog-remb
+a=rtcp-fb:108 transport-cc
+a=rtcp-fb:108 ccm fir
+a=rtcp-fb:108 nack
+a=rtcp-fb:108 nack pli
+a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
+a=rtpmap:109 rtx/90000
+a=fmtp:109 apt=108
+a=rtpmap:127 H264/90000
+a=rtcp-fb:127 goog-remb
+a=rtcp-fb:127 transport-cc
+a=rtcp-fb:127 ccm fir
+a=rtcp-fb:127 nack
+a=rtcp-fb:127 nack pli
+a=fmtp:127 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=4d001f
+a=rtpmap:125 rtx/90000
+a=fmtp:125 apt=127
+a=rtpmap:39 H264/90000
+a=rtcp-fb:39 goog-remb
+a=rtcp-fb:39 transport-cc
+a=rtcp-fb:39 ccm fir
+a=rtcp-fb:39 nack
+a=rtcp-fb:39 nack pli
+a=fmtp:39 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=4d001f
+a=rtpmap:40 rtx/90000
+a=fmtp:40 apt=39
+a=rtpmap:45 AV1/90000
+a=rtcp-fb:45 goog-remb
+a=rtcp-fb:45 transport-cc
+a=rtcp-fb:45 ccm fir
+a=rtcp-fb:45 nack
+a=rtcp-fb:45 nack pli
+a=rtpmap:46 rtx/90000
+a=fmtp:46 apt=45
+a=rtpmap:98 VP9/90000
+a=rtcp-fb:98 goog-remb
+a=rtcp-fb:98 transport-cc
+a=rtcp-fb:98 ccm fir
+a=rtcp-fb:98 nack
+a=rtcp-fb:98 nack pli
+a=fmtp:98 profile-id=0
+a=rtpmap:99 rtx/90000
+a=fmtp:99 apt=98
+a=rtpmap:100 VP9/90000
+a=rtcp-fb:100 goog-remb
+a=rtcp-fb:100 transport-cc
+a=rtcp-fb:100 ccm fir
+a=rtcp-fb:100 nack
+a=rtcp-fb:100 nack pli
+a=fmtp:100 profile-id=2
+a=rtpmap:101 rtx/90000
+a=fmtp:101 apt=100
+a=rtpmap:112 red/90000
+a=rtpmap:113 rtx/90000
+a=fmtp:113 apt=112
+a=rtpmap:114 ulpfec/90000
+a=ssrc-group:FID 603025980 708250965
+a=ssrc:603025980 cname:9QybpVYbfNiliuN8
+a=ssrc:708250965 cname:9QybpVYbfNiliuN8
+m=video 9 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
+a=ice-ufrag:GhyM
+a=ice-pwd:ao0WZaXKPtuG0tbJx+ywDdO7
+a=ice-options:trickle
+a=fingerprint:sha-256 C7:EB:96:6D:5D:FA:B7:58:92:C0:B8:1B:2B:63:49:85:1F:5E:32:A9:4B:2F:65:63:AC:46:05:1A:FE:CD:13:55
+a=setup:active
+a=mid:2
+a=extmap:14 urn:ietf:params:rtp-hdrext:toffset
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=extmap:13 urn:3gpp:video-orientation
+a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+a=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay
+a=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type
+a=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing
+a=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space
+a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id
+a=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id
+a=recvonly
+a=rtcp-mux
+a=rtcp-rsize
+a=rtpmap:96 VP8/90000
+a=rtcp-fb:96 goog-remb
+a=rtcp-fb:96 transport-cc
+a=rtcp-fb:96 ccm fir
+a=rtcp-fb:96 nack
+a=rtcp-fb:96 nack pli
+a=rtpmap:97 rtx/90000
+a=fmtp:97 apt=96
+a=rtpmap:102 H264/90000
+a=rtcp-fb:102 goog-remb
+a=rtcp-fb:102 transport-cc
+a=rtcp-fb:102 ccm fir
+a=rtcp-fb:102 nack
+a=rtcp-fb:102 nack pli
+a=fmtp:102 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42001f
+a=rtpmap:103 rtx/90000
+a=fmtp:103 apt=102
+a=rtpmap:104 H264/90000
+a=rtcp-fb:104 goog-remb
+a=rtcp-fb:104 transport-cc
+a=rtcp-fb:104 ccm fir
+a=rtcp-fb:104 nack
+a=rtcp-fb:104 nack pli
+a=fmtp:104 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42001f
+a=rtpmap:105 rtx/90000
+a=fmtp:105 apt=104
+a=rtpmap:106 H264/90000
+a=rtcp-fb:106 goog-remb
+a=rtcp-fb:106 transport-cc
+a=rtcp-fb:106 ccm fir
+a=rtcp-fb:106 nack
+a=rtcp-fb:106 nack pli
+a=fmtp:106 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f
+a=rtpmap:107 rtx/90000
+a=fmtp:107 apt=106
+a=rtpmap:108 H264/90000
+a=rtcp-fb:108 goog-remb
+a=rtcp-fb:108 transport-cc
+a=rtcp-fb:108 ccm fir
+a=rtcp-fb:108 nack
+a=rtcp-fb:108 nack pli
+a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
+a=rtpmap:109 rtx/90000
+a=fmtp:109 apt=108
+a=rtpmap:127 H264/90000
+a=rtcp-fb:127 goog-remb
+a=rtcp-fb:127 transport-cc
+a=rtcp-fb:127 ccm fir
+a=rtcp-fb:127 nack
+a=rtcp-fb:127 nack pli
+a=fmtp:127 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=4d001f
+a=rtpmap:125 rtx/90000
+a=fmtp:125 apt=127
+a=rtpmap:39 H264/90000
+a=rtcp-fb:39 goog-remb
+a=rtcp-fb:39 transport-cc
+a=rtcp-fb:39 ccm fir
+a=rtcp-fb:39 nack
+a=rtcp-fb:39 nack pli
+a=fmtp:39 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=4d001f
+a=rtpmap:40 rtx/90000
+a=fmtp:40 apt=39
+a=rtpmap:45 AV1/90000
+a=rtcp-fb:45 goog-remb
+a=rtcp-fb:45 transport-cc
+a=rtcp-fb:45 ccm fir
+a=rtcp-fb:45 nack
+a=rtcp-fb:45 nack pli
+a=rtpmap:46 rtx/90000
+a=fmtp:46 apt=45
+a=rtpmap:98 VP9/90000
+a=rtcp-fb:98 goog-remb
+a=rtcp-fb:98 transport-cc
+a=rtcp-fb:98 ccm fir
+a=rtcp-fb:98 nack
+a=rtcp-fb:98 nack pli
+a=fmtp:98 profile-id=0
+a=rtpmap:99 rtx/90000
+a=fmtp:99 apt=98
+a=rtpmap:100 VP9/90000
+a=rtcp-fb:100 goog-remb
+a=rtcp-fb:100 transport-cc
+a=rtcp-fb:100 ccm fir
+a=rtcp-fb:100 nack
+a=rtcp-fb:100 nack pli
+a=fmtp:100 profile-id=2
+a=rtpmap:101 rtx/90000
+a=fmtp:101 apt=100
+a=rtpmap:112 red/90000
+a=rtpmap:113 rtx/90000
+a=fmtp:113 apt=112
+a=rtpmap:114 ulpfec/90000
+m=application 9 UDP/DTLS/SCTP webrtc-datachannel
+c=IN IP4 0.0.0.0
+a=ice-ufrag:GhyM
+a=ice-pwd:ao0WZaXKPtuG0tbJx+ywDdO7
+a=ice-options:trickle
+a=fingerprint:sha-256 C7:EB:96:6D:5D:FA:B7:58:92:C0:B8:1B:2B:63:49:85:1F:5E:32:A9:4B:2F:65:63:AC:46:05:1A:FE:CD:13:55
+a=setup:active
+a=mid:3
+a=sctp-port:5000
+a=max-message-size:262144
+"
+
+
+
+
+m=audio 54383 UDP/TLS/RTP/SAVPF 111 63 9 0 8 13 110 126
+m=video 9 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+m=video 9 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+m=application 9 UDP/DTLS/SCTP webrtc-datachannel
+
+
+
+Robots remote:
+Answer SDP: v=0
+o=- 4863641650208336423 2 IN IP4 127.0.0.1
+s=-
+t=0 0
+a=group:BUNDLE 0 1 2 3
+a=extmap-allow-mixed
+a=msid-semantic: WMS f6900e05-f008-418b-80ea-c4952c0a4d44
+m=audio 59929 UDP/TLS/RTP/SAVPF 111 63 9 0 8 13 110 126
+c=IN IP4 172.16.16.54
+a=rtcp:9 IN IP4 0.0.0.0
+a=candidate:2125449120 1 udp 2122260223 172.16.16.54 59929 typ host generation 0 network-id 1
+a=ice-ufrag:mPUH
+a=ice-pwd:h8z43QZhFsEOiDDuacXMNOFz
+a=ice-options:trickle
+a=fingerprint:sha-256 EC:5A:18:CB:AB:0E:45:18:47:3C:5E:83:F6:2F:F3:DB:64:49:3F:BE:CE:E4:65:61:B0:DD:2A:16:1B:1D:23:01
+a=setup:active
+a=mid:0
+a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid
+a=sendrecv
+a=msid:f6900e05-f008-418b-80ea-c4952c0a4d44 fe208099-a9b8-4436-bd43-b953df868dfc
+a=rtcp-mux
+a=rtpmap:111 opus/48000/2
+a=rtcp-fb:111 transport-cc
+a=fmtp:111 minptime=10;useinbandfec=1
+a=rtpmap:63 red/48000/2
+a=fmtp:63 111/111
+a=rtpmap:9 G722/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+a=rtpmap:13 CN/8000
+a=rtpmap:110 telephone-event/48000
+a=rtpmap:126 telephone-event/8000
+a=ssrc:2980201208 cname:ls4Rum3Y6Vq8PV5G
+m=video 9 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
+a=ice-ufrag:mPUH
+a=ice-pwd:h8z43QZhFsEOiDDuacXMNOFz
+a=ice-options:trickle
+a=fingerprint:sha-256 EC:5A:18:CB:AB:0E:45:18:47:3C:5E:83:F6:2F:F3:DB:64:49:3F:BE:CE:E4:65:61:B0:DD:2A:16:1B:1D:23:01
+a=setup:active
+a=mid:1
+a=extmap:14 urn:ietf:params:rtp-hdrext:toffset
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=extmap:13 urn:3gpp:video-orientation
+a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+a=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay
+a=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type
+a=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing
+a=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space
+a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id
+a=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id
+a=sendrecv
+a=msid:f6900e05-f008-418b-80ea-c4952c0a4d44 9a1bf630-dbd6-401d-9c15-fb917bff2404
+a=rtcp-mux
+a=rtcp-rsize
+a=rtpmap:96 VP8/90000
+a=rtcp-fb:96 goog-remb
+a=rtcp-fb:96 transport-cc
+a=rtcp-fb:96 ccm fir
+a=rtcp-fb:96 nack
+a=rtcp-fb:96 nack pli
+a=rtpmap:97 rtx/90000
+a=fmtp:97 apt=96
+a=rtpmap:102 H264/90000
+a=rtcp-fb:102 goog-remb
+a=rtcp-fb:102 transport-cc
+a=rtcp-fb:102 ccm fir
+a=rtcp-fb:102 nack
+a=rtcp-fb:102 nack pli
+a=fmtp:102 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42001f
+a=rtpmap:103 rtx/90000
+a=fmtp:103 apt=102
+a=rtpmap:104 H264/90000
+a=rtcp-fb:104 goog-remb
+a=rtcp-fb:104 transport-cc
+a=rtcp-fb:104 ccm fir
+a=rtcp-fb:104 nack
+a=rtcp-fb:104 nack pli
+a=fmtp:104 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42001f
+a=rtpmap:105 rtx/90000
+a=fmtp:105 apt=104
+a=rtpmap:106 H264/90000
+a=rtcp-fb:106 goog-remb
+a=rtcp-fb:106 transport-cc
+a=rtcp-fb:106 ccm fir
+a=rtcp-fb:106 nack
+a=rtcp-fb:106 nack pli
+a=fmtp:106 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f
+a=rtpmap:107 rtx/90000
+a=fmtp:107 apt=106
+a=rtpmap:108 H264/90000
+a=rtcp-fb:108 goog-remb
+a=rtcp-fb:108 transport-cc
+a=rtcp-fb:108 ccm fir
+a=rtcp-fb:108 nack
+a=rtcp-fb:108 nack pli
+a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
+a=rtpmap:109 rtx/90000
+a=fmtp:109 apt=108
+a=rtpmap:127 H264/90000
+a=rtcp-fb:127 goog-remb
+a=rtcp-fb:127 transport-cc
+a=rtcp-fb:127 ccm fir
+a=rtcp-fb:127 nack
+a=rtcp-fb:127 nack pli
+a=fmtp:127 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=4d001f
+a=rtpmap:125 rtx/90000
+a=fmtp:125 apt=127
+a=rtpmap:39 H264/90000
+a=rtcp-fb:39 goog-remb
+a=rtcp-fb:39 transport-cc
+a=rtcp-fb:39 ccm fir
+a=rtcp-fb:39 nack
+a=rtcp-fb:39 nack pli
+a=fmtp:39 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=4d001f
+a=rtpmap:40 rtx/90000
+a=fmtp:40 apt=39
+a=rtpmap:45 AV1/90000
+a=rtcp-fb:45 goog-remb
+a=rtcp-fb:45 transport-cc
+a=rtcp-fb:45 ccm fir
+a=rtcp-fb:45 nack
+a=rtcp-fb:45 nack pli
+a=rtpmap:46 rtx/90000
+a=fmtp:46 apt=45
+a=rtpmap:98 VP9/90000
+a=rtcp-fb:98 goog-remb
+a=rtcp-fb:98 transport-cc
+a=rtcp-fb:98 ccm fir
+a=rtcp-fb:98 nack
+a=rtcp-fb:98 nack pli
+a=fmtp:98 profile-id=0
+a=rtpmap:99 rtx/90000
+a=fmtp:99 apt=98
+a=rtpmap:100 VP9/90000
+a=rtcp-fb:100 goog-remb
+a=rtcp-fb:100 transport-cc
+a=rtcp-fb:100 ccm fir
+a=rtcp-fb:100 nack
+a=rtcp-fb:100 nack pli
+a=fmtp:100 profile-id=2
+a=rtpmap:101 rtx/90000
+a=fmtp:101 apt=100
+a=rtpmap:112 red/90000
+a=rtpmap:113 rtx/90000
+a=fmtp:113 apt=112
+a=rtpmap:114 ulpfec/90000
+a=ssrc-group:FID 3789750614 1845378671
+a=ssrc:3789750614 cname:ls4Rum3Y6Vq8PV5G
+a=ssrc:1845378671 cname:ls4Rum3Y6Vq8PV5G
+m=video 9 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
+a=ice-ufrag:mPUH
+a=ice-pwd:h8z43QZhFsEOiDDuacXMNOFz
+a=ice-options:trickle
+a=fingerprint:sha-256 EC:5A:18:CB:AB:0E:45:18:47:3C:5E:83:F6:2F:F3:DB:64:49:3F:BE:CE:E4:65:61:B0:DD:2A:16:1B:1D:23:01
+a=setup:active
+a=mid:2
+a=extmap:14 urn:ietf:params:rtp-hdrext:toffset
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=extmap:13 urn:3gpp:video-orientation
+a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+a=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay
+a=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type
+a=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing
+a=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space
+a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id
+a=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id
+a=sendrecv
+a=msid:3aa305e4-4c4b-44ba-b188-5a56ce32b8a3 5a2ff90e-603e-416f-936f-3c3782f0c346
+a=rtcp-mux
+a=rtcp-rsize
+a=rtpmap:96 VP8/90000
+a=rtcp-fb:96 goog-remb
+a=rtcp-fb:96 transport-cc
+a=rtcp-fb:96 ccm fir
+a=rtcp-fb:96 nack
+a=rtcp-fb:96 nack pli
+a=rtpmap:97 rtx/90000
+a=fmtp:97 apt=96
+a=rtpmap:102 H264/90000
+a=rtcp-fb:102 goog-remb
+a=rtcp-fb:102 transport-cc
+a=rtcp-fb:102 ccm fir
+a=rtcp-fb:102 nack
+a=rtcp-fb:102 nack pli
+a=fmtp:102 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42001f
+a=rtpmap:103 rtx/90000
+a=fmtp:103 apt=102
+a=rtpmap:104 H264/90000
+a=rtcp-fb:104 goog-remb
+a=rtcp-fb:104 transport-cc
+a=rtcp-fb:104 ccm fir
+a=rtcp-fb:104 nack
+a=rtcp-fb:104 nack pli
+a=fmtp:104 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42001f
+a=rtpmap:105 rtx/90000
+a=fmtp:105 apt=104
+a=rtpmap:106 H264/90000
+a=rtcp-fb:106 goog-remb
+a=rtcp-fb:106 transport-cc
+a=rtcp-fb:106 ccm fir
+a=rtcp-fb:106 nack
+a=rtcp-fb:106 nack pli
+a=fmtp:106 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f
+a=rtpmap:107 rtx/90000
+a=fmtp:107 apt=106
+a=rtpmap:108 H264/90000
+a=rtcp-fb:108 goog-remb
+a=rtcp-fb:108 transport-cc
+a=rtcp-fb:108 ccm fir
+a=rtcp-fb:108 nack
+a=rtcp-fb:108 nack pli
+a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
+a=rtpmap:109 rtx/90000
+a=fmtp:109 apt=108
+a=rtpmap:127 H264/90000
+a=rtcp-fb:127 goog-remb
+a=rtcp-fb:127 transport-cc
+a=rtcp-fb:127 ccm fir
+a=rtcp-fb:127 nack
+a=rtcp-fb:127 nack pli
+a=fmtp:127 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=4d001f
+a=rtpmap:125 rtx/90000
+a=fmtp:125 apt=127
+a=rtpmap:39 H264/90000
+a=rtcp-fb:39 goog-remb
+a=rtcp-fb:39 transport-cc
+a=rtcp-fb:39 ccm fir
+a=rtcp-fb:39 nack
+a=rtcp-fb:39 nack pli
+a=fmtp:39 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=4d001f
+a=rtpmap:40 rtx/90000
+a=fmtp:40 apt=39
+a=rtpmap:45 AV1/90000
+a=rtcp-fb:45 goog-remb
+a=rtcp-fb:45 transport-cc
+a=rtcp-fb:45 ccm fir
+a=rtcp-fb:45 nack
+a=rtcp-fb:45 nack pli
+a=rtpmap:46 rtx/90000
+a=fmtp:46 apt=45
+a=rtpmap:98 VP9/90000
+a=rtcp-fb:98 goog-remb
+a=rtcp-fb:98 transport-cc
+a=rtcp-fb:98 ccm fir
+a=rtcp-fb:98 nack
+a=rtcp-fb:98 nack pli
+a=fmtp:98 profile-id=0
+a=rtpmap:99 rtx/90000
+a=fmtp:99 apt=98
+a=rtpmap:100 VP9/90000
+a=rtcp-fb:100 goog-remb
+a=rtcp-fb:100 transport-cc
+a=rtcp-fb:100 ccm fir
+a=rtcp-fb:100 nack
+a=rtcp-fb:100 nack pli
+a=fmtp:100 profile-id=2
+a=rtpmap:101 rtx/90000
+a=fmtp:101 apt=100
+a=rtpmap:112 red/90000
+a=rtpmap:113 rtx/90000
+a=fmtp:113 apt=112
+a=rtpmap:114 ulpfec/90000
+a=ssrc-group:FID 4278460652 2221209224
+a=ssrc:4278460652 cname:ls4Rum3Y6Vq8PV5G
+a=ssrc:2221209224 cname:ls4Rum3Y6Vq8PV5G
+m=application 9 UDP/DTLS/SCTP webrtc-datachannel
+c=IN IP4 0.0.0.0
+a=ice-ufrag:mPUH
+a=ice-pwd:h8z43QZhFsEOiDDuacXMNOFz
+a=ice-options:trickle
+a=fingerprint:sha-256 EC:5A:18:CB:AB:0E:45:18:47:3C:5E:83:F6:2F:F3:DB:64:49:3F:BE:CE:E4:65:61:B0:DD:2A:16:1B:1D:23:01
+a=setup:active
+a=mid:3
+a=sctp-port:5000
+a=max-message-size:262144
+
+m=audio 59929 UDP/TLS/RTP/SAVPF 111 63 9 0 8 13 110 126
+m=video 9 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+m=video 9 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+m=application 9 UDP/DTLS/SCTP webrtc-datachannel
+
+
+shuvo's remote:
+v=0
+o=- 1059522139030720296 2 IN IP4 127.0.0.1
+s=-
+t=0 0
+a=group:BUNDLE 0 1 2 3
+a=extmap-allow-mixed
+a=msid-semantic: WMS d5ce28f9-37f4-4a92-89e4-452607d41ee3
+m=audio 52636 UDP/TLS/RTP/SAVPF 111 63 9 0 8 13 110 126
+c=IN IP4 27.147.235.178
+a=rtcp:9 IN IP4 0.0.0.0
+a=candidate:2632139084 1 udp 2122260223 172.16.16.54 52636 typ host generation 0 network-id 1
+a=candidate:2648912746 1 udp 1686052607 27.147.235.178 52636 typ srflx raddr 172.16.16.54 rport 52636 generation 0 network-id 1
+a=candidate:1648989656 1 tcp 1518280447 172.16.16.54 9 typ host tcptype active generation 0 network-id 1
+a=ice-ufrag:4H6o
+a=ice-pwd:EomwMZ++UFDuy26Z48QUXZLd
+a=ice-options:trickle
+a=fingerprint:sha-256 D6:46:3C:50:F4:BC:4A:74:20:01:17:CE:2B:87:1F:29:8A:D8:FC:2F:BB:B3:14:42:22:0E:40:E2:D4:D7:84:CE
+a=setup:actpass
+a=mid:0
+a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid
+a=sendrecv
+a=msid:d5ce28f9-37f4-4a92-89e4-452607d41ee3 1c7770a3-6a76-4bf3-8b28-c741d80f55ba
+a=rtcp-mux
+a=rtpmap:111 opus/48000/2
+a=rtcp-fb:111 transport-cc
+a=fmtp:111 minptime=10;useinbandfec=1
+a=rtpmap:63 red/48000/2
+a=fmtp:63 111/111
+a=rtpmap:9 G722/8000
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+a=rtpmap:13 CN/8000
+a=rtpmap:110 telephone-event/48000
+a=rtpmap:126 telephone-event/8000
+a=ssrc:683844510 cname:aB7YvmpVKbk3sHG2
+a=ssrc:683844510 msid:d5ce28f9-37f4-4a92-89e4-452607d41ee3 1c7770a3-6a76-4bf3-8b28-c741d80f55ba
+m=video 40926 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+c=IN IP4 27.147.235.178
+a=rtcp:9 IN IP4 0.0.0.0
+a=candidate:2632139084 1 udp 2122260223 172.16.16.54 40926 typ host generation 0 network-id 1
+a=candidate:2648912746 1 udp 1686052607 27.147.235.178 40926 typ srflx raddr 172.16.16.54 rport 40926 generation 0 network-id 1
+a=candidate:1648989656 1 tcp 1518280447 172.16.16.54 9 typ host tcptype active generation 0 network-id 1
+a=ice-ufrag:4H6o
+a=ice-pwd:EomwMZ++UFDuy26Z48QUXZLd
+a=ice-options:trickle
+a=fingerprint:sha-256 D6:46:3C:50:F4:BC:4A:74:20:01:17:CE:2B:87:1F:29:8A:D8:FC:2F:BB:B3:14:42:22:0E:40:E2:D4:D7:84:CE
+a=setup:actpass
+a=mid:1
+a=extmap:14 urn:ietf:params:rtp-hdrext:toffset
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=extmap:13 urn:3gpp:video-orientation
+a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+a=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay
+a=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type
+a=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing
+a=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space
+a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id
+a=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id
+a=sendrecv
+a=msid:d5ce28f9-37f4-4a92-89e4-452607d41ee3 fa7f1fc5-8ae3-4084-bcae-964956da757d
+a=rtcp-mux
+a=rtcp-rsize
+a=rtpmap:96 VP8/90000
+a=rtcp-fb:96 goog-remb
+a=rtcp-fb:96 transport-cc
+a=rtcp-fb:96 ccm fir
+a=rtcp-fb:96 nack
+a=rtcp-fb:96 nack pli
+a=rtpmap:97 rtx/90000
+a=fmtp:97 apt=96
+a=rtpmap:102 H264/90000
+a=rtcp-fb:102 goog-remb
+a=rtcp-fb:102 transport-cc
+a=rtcp-fb:102 ccm fir
+a=rtcp-fb:102 nack
+a=rtcp-fb:102 nack pli
+a=fmtp:102 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42001f
+a=rtpmap:103 rtx/90000
+a=fmtp:103 apt=102
+a=rtpmap:104 H264/90000
+a=rtcp-fb:104 goog-remb
+a=rtcp-fb:104 transport-cc
+a=rtcp-fb:104 ccm fir
+a=rtcp-fb:104 nack
+a=rtcp-fb:104 nack pli
+a=fmtp:104 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42001f
+a=rtpmap:105 rtx/90000
+a=fmtp:105 apt=104
+a=rtpmap:106 H264/90000
+a=rtcp-fb:106 goog-remb
+a=rtcp-fb:106 transport-cc
+a=rtcp-fb:106 ccm fir
+a=rtcp-fb:106 nack
+a=rtcp-fb:106 nack pli
+a=fmtp:106 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f
+a=rtpmap:107 rtx/90000
+a=fmtp:107 apt=106
+a=rtpmap:108 H264/90000
+a=rtcp-fb:108 goog-remb
+a=rtcp-fb:108 transport-cc
+a=rtcp-fb:108 ccm fir
+a=rtcp-fb:108 nack
+a=rtcp-fb:108 nack pli
+a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
+a=rtpmap:109 rtx/90000
+a=fmtp:109 apt=108
+a=rtpmap:127 H264/90000
+a=rtcp-fb:127 goog-remb
+a=rtcp-fb:127 transport-cc
+a=rtcp-fb:127 ccm fir
+a=rtcp-fb:127 nack
+a=rtcp-fb:127 nack pli
+a=fmtp:127 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=4d001f
+a=rtpmap:125 rtx/90000
+a=fmtp:125 apt=127
+a=rtpmap:39 H264/90000
+a=rtcp-fb:39 goog-remb
+a=rtcp-fb:39 transport-cc
+a=rtcp-fb:39 ccm fir
+a=rtcp-fb:39 nack
+a=rtcp-fb:39 nack pli
+a=fmtp:39 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=4d001f
+a=rtpmap:40 rtx/90000
+a=fmtp:40 apt=39
+a=rtpmap:45 AV1/90000
+a=rtcp-fb:45 goog-remb
+a=rtcp-fb:45 transport-cc
+a=rtcp-fb:45 ccm fir
+a=rtcp-fb:45 nack
+a=rtcp-fb:45 nack pli
+a=rtpmap:46 rtx/90000
+a=fmtp:46 apt=45
+a=rtpmap:98 VP9/90000
+a=rtcp-fb:98 goog-remb
+a=rtcp-fb:98 transport-cc
+a=rtcp-fb:98 ccm fir
+a=rtcp-fb:98 nack
+a=rtcp-fb:98 nack pli
+a=fmtp:98 profile-id=0
+a=rtpmap:99 rtx/90000
+a=fmtp:99 apt=98
+a=rtpmap:100 VP9/90000
+a=rtcp-fb:100 goog-remb
+a=rtcp-fb:100 transport-cc
+a=rtcp-fb:100 ccm fir
+a=rtcp-fb:100 nack
+a=rtcp-fb:100 nack pli
+a=fmtp:100 profile-id=2
+a=rtpmap:101 rtx/90000
+a=fmtp:101 apt=100
+a=rtpmap:112 red/90000
+a=rtpmap:113 rtx/90000
+a=fmtp:113 apt=112
+a=rtpmap:114 ulpfec/90000
+a=ssrc-group:FID 2474120451 1511533829
+a=ssrc:2474120451 cname:aB7YvmpVKbk3sHG2
+a=ssrc:2474120451 msid:d5ce28f9-37f4-4a92-89e4-452607d41ee3 fa7f1fc5-8ae3-4084-bcae-964956da757d
+a=ssrc:1511533829 cname:aB7YvmpVKbk3sHG2
+a=ssrc:1511533829 msid:d5ce28f9-37f4-4a92-89e4-452607d41ee3 fa7f1fc5-8ae3-4084-bcae-964956da757d
+m=video 51821 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+c=IN IP4 27.147.235.178
+a=rtcp:9 IN IP4 0.0.0.0
+a=candidate:2632139084 1 udp 2122260223 172.16.16.54 51821 typ host generation 0 network-id 1
+a=candidate:2648912746 1 udp 1686052607 27.147.235.178 51821 typ srflx raddr 172.16.16.54 rport 51821 generation 0 network-id 1
+a=candidate:1648989656 1 tcp 1518280447 172.16.16.54 9 typ host tcptype active generation 0 network-id 1
+a=ice-ufrag:4H6o
+a=ice-pwd:EomwMZ++UFDuy26Z48QUXZLd
+a=ice-options:trickle
+a=fingerprint:sha-256 D6:46:3C:50:F4:BC:4A:74:20:01:17:CE:2B:87:1F:29:8A:D8:FC:2F:BB:B3:14:42:22:0E:40:E2:D4:D7:84:CE
+a=setup:actpass
+a=mid:2
+a=extmap:14 urn:ietf:params:rtp-hdrext:toffset
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=extmap:13 urn:3gpp:video-orientation
+a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+a=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay
+a=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type
+a=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing
+a=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space
+a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id
+a=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id
+a=sendrecv
+a=msid:858fd258-21fd-42ac-95e8-112cbcd9b197 9699e350-3f02-48e4-a1ae-8035ea7490dc
+a=rtcp-mux
+a=rtcp-rsize
+a=rtpmap:96 VP8/90000
+a=rtcp-fb:96 goog-remb
+a=rtcp-fb:96 transport-cc
+a=rtcp-fb:96 ccm fir
+a=rtcp-fb:96 nack
+a=rtcp-fb:96 nack pli
+a=rtpmap:97 rtx/90000
+a=fmtp:97 apt=96
+a=rtpmap:102 H264/90000
+a=rtcp-fb:102 goog-remb
+a=rtcp-fb:102 transport-cc
+a=rtcp-fb:102 ccm fir
+a=rtcp-fb:102 nack
+a=rtcp-fb:102 nack pli
+a=fmtp:102 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42001f
+a=rtpmap:103 rtx/90000
+a=fmtp:103 apt=102
+a=rtpmap:104 H264/90000
+a=rtcp-fb:104 goog-remb
+a=rtcp-fb:104 transport-cc
+a=rtcp-fb:104 ccm fir
+a=rtcp-fb:104 nack
+a=rtcp-fb:104 nack pli
+a=fmtp:104 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42001f
+a=rtpmap:105 rtx/90000
+a=fmtp:105 apt=104
+a=rtpmap:106 H264/90000
+a=rtcp-fb:106 goog-remb
+a=rtcp-fb:106 transport-cc
+a=rtcp-fb:106 ccm fir
+a=rtcp-fb:106 nack
+a=rtcp-fb:106 nack pli
+a=fmtp:106 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f
+a=rtpmap:107 rtx/90000
+a=fmtp:107 apt=106
+a=rtpmap:108 H264/90000
+a=rtcp-fb:108 goog-remb
+a=rtcp-fb:108 transport-cc
+a=rtcp-fb:108 ccm fir
+a=rtcp-fb:108 nack
+a=rtcp-fb:108 nack pli
+a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
+a=rtpmap:109 rtx/90000
+a=fmtp:109 apt=108
+a=rtpmap:127 H264/90000
+a=rtcp-fb:127 goog-remb
+a=rtcp-fb:127 transport-cc
+a=rtcp-fb:127 ccm fir
+a=rtcp-fb:127 nack
+a=rtcp-fb:127 nack pli
+a=fmtp:127 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=4d001f
+a=rtpmap:125 rtx/90000
+a=fmtp:125 apt=127
+a=rtpmap:39 H264/90000
+a=rtcp-fb:39 goog-remb
+a=rtcp-fb:39 transport-cc
+a=rtcp-fb:39 ccm fir
+a=rtcp-fb:39 nack
+a=rtcp-fb:39 nack pli
+a=fmtp:39 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=4d001f
+a=rtpmap:40 rtx/90000
+a=fmtp:40 apt=39
+a=rtpmap:45 AV1/90000
+a=rtcp-fb:45 goog-remb
+a=rtcp-fb:45 transport-cc
+a=rtcp-fb:45 ccm fir
+a=rtcp-fb:45 nack
+a=rtcp-fb:45 nack pli
+a=rtpmap:46 rtx/90000
+a=fmtp:46 apt=45
+a=rtpmap:98 VP9/90000
+a=rtcp-fb:98 goog-remb
+a=rtcp-fb:98 transport-cc
+a=rtcp-fb:98 ccm fir
+a=rtcp-fb:98 nack
+a=rtcp-fb:98 nack pli
+a=fmtp:98 profile-id=0
+a=rtpmap:99 rtx/90000
+a=fmtp:99 apt=98
+a=rtpmap:100 VP9/90000
+a=rtcp-fb:100 goog-remb
+a=rtcp-fb:100 transport-cc
+a=rtcp-fb:100 ccm fir
+a=rtcp-fb:100 nack
+a=rtcp-fb:100 nack pli
+a=fmtp:100 profile-id=2
+a=rtpmap:101 rtx/90000
+a=fmtp:101 apt=100
+a=rtpmap:112 red/90000
+a=rtpmap:113 rtx/90000
+a=fmtp:113 apt=112
+a=rtpmap:114 ulpfec/90000
+a=ssrc-group:FID 13545218 245802228
+a=ssrc:13545218 cname:aB7YvmpVKbk3sHG2
+a=ssrc:13545218 msid:858fd258-21fd-42ac-95e8-112cbcd9b197 9699e350-3f02-48e4-a1ae-8035ea7490dc
+a=ssrc:245802228 cname:aB7YvmpVKbk3sHG2
+a=ssrc:245802228 msid:858fd258-21fd-42ac-95e8-112cbcd9b197 9699e350-3f02-48e4-a1ae-8035ea7490dc
+m=application 58445 UDP/DTLS/SCTP webrtc-datachannel
+c=IN IP4 27.147.235.178
+a=candidate:2632139084 1 udp 2122260223 172.16.16.54 58445 typ host generation 0 network-id 1
+a=candidate:2648912746 1 udp 1686052607 27.147.235.178 58445 typ srflx raddr 172.16.16.54 rport 58445 generation 0 network-id 1
+a=candidate:1648989656 1 tcp 1518280447 172.16.16.54 9 typ host tcptype active generation 0 network-id 1
+a=ice-ufrag:4H6o
+a=ice-pwd:EomwMZ++UFDuy26Z48QUXZLd
+a=ice-options:trickle
+a=fingerprint:sha-256 D6:46:3C:50:F4:BC:4A:74:20:01:17:CE:2B:87:1F:29:8A:D8:FC:2F:BB:B3:14:42:22:0E:40:E2:D4:D7:84:CE
+a=setup:actpass
+a=mid:3
+a=sctp-port:5000
+a=max-message-size:262144
+
+
+m=audio 52636 UDP/TLS/RTP/SAVPF 111 63 9 0 8 13 110 126
+m=video 40926 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+m=video 51821 UDP/TLS/RTP/SAVPF 96 97 102 103 104 105 106 107 108 109 127 125 39 40 45 46 98 99 100 101 112 113 114
+m=application 58445 UDP/DTLS/SCTP webrtc-datachannel
+
+
+a=msid:67b79bf9-2a8d-4774-b572-7ac7e9e74dae 82540ad1-9305-4e47-8841-5c212d195e25
+a=rtcp-mux
+a=msid:8282e817-e1c4-4284-a2ea-b64a92094b02 b5f74bdd-1a17-4424-b27b-e45fe7b81797
+a=rtcp-mux
