@@ -54,7 +54,7 @@ spacy-alignments==0.8.5
 spacy-loggers==1.0.3
 spacy-transformers==1.1.8
 sqlparse==0.4.3
-srsly==2.4.4
+srsly==2.4.8
 tomli==2.0.1
 torch==1.12.1
 tqdm==4.64.1
