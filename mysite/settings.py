@@ -11,10 +11,15 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
-
+import dj_database_url
 import os
 
 from decouple import config
+from dotenv import load_dotenv
+
+
+env_path = Path('.') / 'env' / '.env'
+load_dotenv(dotenv_path=env_path)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
@@ -24,13 +29,16 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ['django-insecure-y8t^u^4rn9gk3!o%fqc)w4ht%y-!q+x72(hp2p(wv(8d5f!)s&']
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
+DEBUG = os.environ.get("DEBUG","False").lower() =='true'
 # ALLOWED_HOSTS = ['172.16.16.47','172.0.0.1','localhost','172.16.16.215']
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS","").split(" ")
+print('ALLOWED_HOSTS: ',ALLOWED_HOSTS)
 
 
 NUMB_TURN_CREDENTIAL = config('NUMB_TURN_CREDENTIAL', default=None)
@@ -96,6 +104,8 @@ DATABASES = {
     }
 }
 
+database_url = os.environ.get('DATABASE_URL')
+DATABASES["default"] = dj_database_url.parse(database_url)
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
