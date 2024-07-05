@@ -155,20 +155,20 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 # Channels
 ASGI_APPLICATION = 'mysite.asgi.application'
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
-
 # CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             "hosts": [('127.0.0.1', 6379)],
-#         },
-#     },
+#     "default": {
+#         "BACKEND": "channels.layers.InMemoryChannelLayer"
+#     }
 # }
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 CORS_ALLOW_ALL_ORIGINS = True
 LOGIN_URL = '/login/'
