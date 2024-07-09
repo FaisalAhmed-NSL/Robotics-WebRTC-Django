@@ -107,7 +107,8 @@ if (loc.protocol == 'https:') {
     wsStart = 'wss://';
 }
 
-var endPoint = wsStart + loc.host + loc.pathname;
+// var endPoint = wsStart + loc.host + loc.pathname;
+endPoint = 'wss://robotics-webrtc-django.onrender.com/ws/chat/';
 // endPoint = 'wss://robotics-webrtc-django.onrender.com/';
 // console.log(`${wsStart} + ${loc.host} + ${loc.pathname}`,endPoint);
 var webSocket;
